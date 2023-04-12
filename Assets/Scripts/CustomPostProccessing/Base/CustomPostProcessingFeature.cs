@@ -14,16 +14,14 @@ namespace CPP{
         // 所有后处理基类列表
         private List<CustomPostProcessing> mCustomPostProcessings;
 
-        // 用于after PostProcess的RT
-        private RTHandle mAfterPostProcessTexture;
-        protected virtual string mAfterPostProcessTextureName => "_CameraColorAttachmentB";
-
         // 获取所有自定义后处理组件，并且根据插入点排序，放入到对应Render Pass中
         public override void Create() {
+            // 获取所有VolumeComponent的基类 不论是否在Volume中 不论是否激活
             var stack = VolumeManager.instance.stack;
+
             // 获取volumeStack中所有CustomPostProcessing
             mCustomPostProcessings = VolumeManager.instance.baseComponentTypeArray
-                .Where(t => t.IsSubclassOf(typeof(CustomPostProcessing)) && stack.GetComponent(t) != null) // 筛选出volumeStack中非null的CustomPostProcessing类型组件
+                .Where(t => t.IsSubclassOf(typeof(CustomPostProcessing))) // 筛选出volumeStack中非null的CustomPostProcessing类型组件
                 .Select(t => stack.GetComponent(t) as CustomPostProcessing) // 将组件转换为CustomPostProcessing类型
                 .ToList(); // 转换为List
 
@@ -51,8 +49,6 @@ namespace CPP{
                 .ToList();
             mAfterPostProcessPass = new CustomPostProcessingPass("Custom PostProcess after PostProcessing", afterPostProcessCPPs);
             mAfterPostProcessPass.renderPassEvent = RenderPassEvent.AfterRenderingPostProcessing;
-
-            mAfterPostProcessTexture = RTHandles.Alloc(mAfterPostProcessTextureName, name: mAfterPostProcessTextureName);
         }
 
 
@@ -60,21 +56,21 @@ namespace CPP{
         // 当为每个摄像机设置一个渲染器时，调用此方法
         public override void AddRenderPasses(ScriptableRenderer renderer, ref RenderingData renderingData) {
             // 当前渲染的游戏相机支持后处理
-            if (renderingData.cameraData.postProcessEnabled) {
+            if (renderingData.cameraData.postProcessEnabled || renderingData.cameraData.cameraType == CameraType.SceneView) {
                 // 为每个render pass设置RT
                 // 并且将pass列表加到renderer中
-                if (mAfterOpaqueAndSkyPass.SetupCustomPostProcessing()) {
-                    // mAfterOpaqueAndSkyPass.ConfigureInput(ScriptableRenderPassInput.Color);
-                    // mAfterOpaqueAndSkyPass.Setup(renderer.cameraColorTargetHandle, renderer.cameraColorTargetHandle);
-                    renderer.EnqueuePass(mAfterOpaqueAndSkyPass);
-                }
-            
                 if (mBeforePostProcessPass.SetupCustomPostProcessing()) {
                     // mBeforePostProcessPass.ConfigureInput(ScriptableRenderPassInput.Color);
                     // mBeforePostProcessPass.Setup(renderer.cameraColorTargetHandle, renderer.cameraColorTargetHandle);
                     renderer.EnqueuePass(mBeforePostProcessPass);
                 }
-            
+
+                if (mAfterOpaqueAndSkyPass.SetupCustomPostProcessing()) {
+                    // mAfterOpaqueAndSkyPass.ConfigureInput(ScriptableRenderPassInput.Color);
+                    // mAfterOpaqueAndSkyPass.Setup(renderer.cameraColorTargetHandle, renderer.cameraColorTargetHandle);
+                    renderer.EnqueuePass(mAfterOpaqueAndSkyPass);
+                }
+
                 if (mAfterPostProcessPass.SetupCustomPostProcessing()) {
                     // 如果下一个Pass是FinalBilt，则输入与输出均为AfterPostProcessTexture
                     // source = renderingData.cameraData.resolveFinalTarget ? mAfterPostProcessTexture : source;

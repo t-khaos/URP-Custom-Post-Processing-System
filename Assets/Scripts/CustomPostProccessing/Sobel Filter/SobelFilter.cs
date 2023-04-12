@@ -17,7 +17,7 @@ namespace Pamisu.CustomPP.Effects
 
         private const string ShaderName = "Hidden/PostProcess/SobleFilter";
 
-        public override CustomPostProcessInjectionPoint InjectionPoint => CustomPostProcessInjectionPoint.AfterOpaqueAndSky;
+        public override CustomPostProcessInjectionPoint InjectionPoint => CustomPostProcessInjectionPoint.BeforePostProcess;
 
         public override void Setup()
         {
@@ -27,7 +27,7 @@ namespace Pamisu.CustomPP.Effects
 
         public override bool IsActive() => material != null && lineThickness.value > 0f;
 
-        public override void Render(CommandBuffer cmd, ref RenderingData renderingData, RenderTargetIdentifier source, RenderTargetIdentifier destination) {
+        public override void Render(CommandBuffer cmd, ref RenderingData renderingData, RTHandle source, RTHandle destination) {
             Debug.Log("Sobel Filter Render");
             if (material == null)
                 return;

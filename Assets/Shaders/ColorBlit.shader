@@ -1,10 +1,14 @@
 Shader "Hidden/PostProcess/ColorBlit" {
+    Properties {
+        // 显式声明出来_MainTex
+        [HideInInspector]_MainTex ("Base (RGB)", 2D) = "white" {}
+    }
     SubShader {
+
         Tags {
             "RenderType"="Opaque" "RenderPipeline" = "UniversalPipeline"
         }
-        LOD 100
-        ZWrite Off Cull Off
+        LOD 200
         Pass {
             Name "ColorBlitPass"
 
@@ -14,7 +18,7 @@ Shader "Hidden/PostProcess/ColorBlit" {
 
             TEXTURE2D(_CameraDepthTexture);
             SAMPLER(sampler_CameraDepthTexture);
-            
+
             TEXTURE2D(_MainTex);
             SAMPLER(sampler_MainTex);
 

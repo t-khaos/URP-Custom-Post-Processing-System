@@ -1,4 +1,5 @@
 using System;
+using UnityEngine;
 using UnityEngine.Rendering;
 using UnityEngine.Rendering.Universal;
 
@@ -10,7 +11,7 @@ namespace CPP{
     }
 
     public abstract class CustomPostProcessing : VolumeComponent, IPostProcessComponent, IDisposable{
-        //  注入点的顺序
+    //  注入点的顺序
         public virtual int OrderInPass => 0;
 
         // 插入位置
@@ -19,7 +20,7 @@ namespace CPP{
         public abstract void Setup();
 
         // 执行渲染
-        public abstract void Render(CommandBuffer cmd, ref RenderingData renderingData, RenderTargetIdentifier source, RenderTargetIdentifier destination);
+        public abstract void Render(CommandBuffer cmd, ref RenderingData renderingData, RTHandle source, RTHandle destination);
 
         #region IPostProcessComponent
 

@@ -17,14 +17,13 @@ namespace CPP{
         private List<ProfilingSampler> mProfilingSamplers;
 
         // 声明RT
-        private RenderTargetIdentifier mSourceRT;
-        private RenderTargetIdentifier mDesRT;
-        private RenderTargetIdentifier mTempRT0;
-        private RenderTargetIdentifier mTempRT1;
-        private int mSourceId;
-        private int mDesId;
-        private int mTempRT0Id = Shader.PropertyToID("_TemporaryRenderTexture0");
-        private int mTempRT1Id = Shader.PropertyToID("_TemporaryRenderTexture1");
+        private RTHandle mSourceRT;
+        private RTHandle mDesRT;
+        private RTHandle mTempRT0;
+        private RTHandle mTempRT1;
+
+        private string mTempRT0Name => "_TemporaryRenderTexture0";
+        private string mTempRT1Name => "_TemporaryRenderTexture1";
 
         public CustomPostProcessingPass(string profilerTag, List<CustomPostProcessing> customPostProcessings) {
             mProfilerTag = profilerTag;
@@ -33,8 +32,8 @@ namespace CPP{
             // 将自定义后处理器对象列表转换成一个性能采样器对象列表
             mProfilingSamplers = customPostProcessings.Select(c => new ProfilingSampler(c.ToString())).ToList();
 
-            // mTempRT0 = RTHandles.Alloc("_TemporaryRenderTexture0", name: "_TemporaryRenderTexture0");
-            // mTempRT1 = RTHandles.Alloc("_TemporaryRenderTexture1", name: "_TemporaryRenderTexture1");
+            mTempRT0 = RTHandles.Alloc(mTempRT0Name, name: mTempRT0Name);
+            mTempRT1 = RTHandles.Alloc(mTempRT1Name, name: mTempRT1Name);
         }
 
         // 设置CustomPostProcessing，并返回是否存在有效组件
@@ -50,27 +49,14 @@ namespace CPP{
             return mActiveCustomPostProcessingIndex.Count != 0;
         }
 
-        // 设置渲染源和渲染目标
-        // public void Setup(RTHandle source, RTHandle destination) {
-        //     mSourceRT = source;
-        //     mDesRT = destination;
-        // }
-
         public override void OnCameraSetup(CommandBuffer cmd, ref RenderingData renderingData) {
             RenderTextureDescriptor blitTargetDescriptor = renderingData.cameraData.cameraTargetDescriptor;
             blitTargetDescriptor.depthBufferBits = 0;
 
             var renderer = renderingData.cameraData.renderer;
 
-            // mSourceRT = renderer.cameraColorTargetHandle;
-            // mDesRT = renderer.cameraColorTargetHandle;
-
-            mSourceId = -1;
-            mSourceRT = renderer.cameraColorTargetHandle.nameID;
-            mDesId = -1;
-            mDesRT = renderer.cameraColorTargetHandle.nameID;
-
-            Debug.Log(renderer.cameraColorTargetHandle.name);
+            // 源RT固定为相机的颜色RT "_CameraColorAttachmentA"
+            mSourceRT = renderer.cameraColorTargetHandle;
         }
 
         // 实现渲染逻辑
@@ -86,15 +72,15 @@ namespace CPP{
             descriptor.depthBufferBits = 0;
 
             // 初始化临时RT
-            // bool rt1Used = false;
+            bool rt1Used = false;
 
-            // 如果des没有初始化，则需要获取RT，主要是des为AfterPostProcessTexture的情况
-            // if (mDesRT != renderingData.cameraData.renderer.cameraColorTargetHandle /* && !mDesRT.HasInternalRenderTargetId()*/) {
-            //     cmd.GetTemporaryRT(Shader.PropertyToID(mDesRT.name), descriptor, FilterMode.Trilinear);
-            // }
-            
-            cmd.GetTemporaryRT(mTempRT0Id, descriptor);
-            mTempRT0 = new RenderTargetIdentifier(mTempRT0Id);
+            // 设置目标RT为本次渲染的RT 在Execute里进行 特殊处理后处理后注入点
+            mDesRT = renderingData.cameraData.renderer.cameraColorTargetHandle;
+
+            // 声明temp0临时纹理
+            // cmd.GetTemporaryRT(Shader.PropertyToID(mTempRT0.name), descriptor);
+            // mTempRT0 = RTHandles.Alloc(mTempRT0.name);
+            RenderingUtils.ReAllocateIfNeeded(ref mTempRT0, descriptor, name: mTempRT0Name);
 
             // 执行每个组件的Render方法
             if (mActiveCustomPostProcessingIndex.Count == 1) {
@@ -103,33 +89,27 @@ namespace CPP{
                     mCustomPostProcessings[index].Render(cmd, ref renderingData, mSourceRT, mTempRT0);
                 }
             }
-            // else {
-            //     // 如果有多个组件，则在两个RT上来回bilt
-            //     cmd.GetTemporaryRT(Shader.PropertyToID(mTempRT1.name), descriptor);
-            //     rt1Used = true;
-            //     Blit(cmd, mSourceRT, mTempRT0);
-            //     for (int i = 0; i < mActiveCustomPostProcessingIndex.Count; i++) {
-            //         int index = mActiveCustomPostProcessingIndex[i];
-            //         var customProcessing = mCustomPostProcessings[index];
-            //         using (new ProfilingScope(cmd, mProfilingSamplers[index])) {
-            //             customProcessing.Render(cmd, ref renderingData, mTempRT0, mTempRT1);
-            //         }
-            //
-            //         CoreUtils.Swap(ref mTempRT0, ref mTempRT1);
-            //     }
-            // }
-            
+            else {
+                // 如果有多个组件，则在两个RT上来回bilt
+                RenderingUtils.ReAllocateIfNeeded(ref mTempRT1, descriptor, name: mTempRT1Name);
+                rt1Used = true;
+                Blit(cmd, mSourceRT, mTempRT0);
+                for (int i = 0; i < mActiveCustomPostProcessingIndex.Count; i++) {
+                    int index = mActiveCustomPostProcessingIndex[i];
+                    var customProcessing = mCustomPostProcessings[index];
+                    using (new ProfilingScope(cmd, mProfilingSamplers[index])) {
+                        customProcessing.Render(cmd, ref renderingData, mTempRT0, mTempRT1);
+                    }
 
-            ProfilingSampler tmp = new ProfilingSampler("to camera");
-            using (new ProfilingScope(cmd, tmp)) {
-                // Blit(cmd, mSourceRT, mTempRT0);
-                Blit(cmd, mTempRT0, mDesRT);
+                    CoreUtils.Swap(ref mTempRT0, ref mTempRT1);
+                }
             }
+            
+            Blit(cmd, mTempRT0, mDesRT);
 
             // 释放
-            cmd.ReleaseTemporaryRT(mTempRT0Id);
-            // cmd.ReleaseTemporaryRT(mTempRT1Id);
-            // if (rt1Used) cmd.ReleaseTemporaryRT(Shader.PropertyToID(mTempRT1.name));
+            cmd.ReleaseTemporaryRT(Shader.PropertyToID(mTempRT0.name));
+            if (rt1Used) cmd.ReleaseTemporaryRT(Shader.PropertyToID(mTempRT1.name));
 
             context.ExecuteCommandBuffer(cmd);
             CommandBufferPool.Release(cmd);
