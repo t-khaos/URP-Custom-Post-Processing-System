@@ -11,12 +11,13 @@ namespace CPP{
     }
 
     public abstract class CustomPostProcessing : VolumeComponent, IPostProcessComponent, IDisposable{
-    //  注入点的顺序
-        public virtual int OrderInPass => 0;
-
-        // 插入位置
+        // 注入点
         public virtual CustomPostProcessInjectionPoint InjectionPoint => CustomPostProcessInjectionPoint.AfterPostProcess;
+        
+        //  在注入点的顺序
+        public virtual int OrderInInjectonPoint => 0;
 
+        // 配置当前后处理
         public abstract void Setup();
 
         // 执行渲染

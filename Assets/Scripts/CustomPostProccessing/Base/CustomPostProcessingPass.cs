@@ -36,7 +36,7 @@ namespace CPP{
             mTempRT1 = RTHandles.Alloc(mTempRT1Name, name: mTempRT1Name);
         }
 
-        // 设置CustomPostProcessing，并返回是否存在有效组件
+        // 获取active的CPPs下标，并返回是否存在有效组件
         public bool SetupCustomPostProcessing() {
             mActiveCustomPostProcessingIndex.Clear();
             for (int i = 0; i < mCustomPostProcessings.Count; i++) {
@@ -49,6 +49,7 @@ namespace CPP{
             return mActiveCustomPostProcessingIndex.Count != 0;
         }
 
+        // 相机渲染前调用
         public override void OnCameraSetup(CommandBuffer cmd, ref RenderingData renderingData) {
             RenderTextureDescriptor blitTargetDescriptor = renderingData.cameraData.cameraTargetDescriptor;
             blitTargetDescriptor.depthBufferBits = 0;
@@ -105,7 +106,7 @@ namespace CPP{
                 }
             }
             
-            Blit(cmd, mTempRT0, mDesRT);
+            Blitter.BlitCameraTexture(cmd, mTempRT0, mDesRT);
 
             // 释放
             cmd.ReleaseTemporaryRT(Shader.PropertyToID(mTempRT0.name));
