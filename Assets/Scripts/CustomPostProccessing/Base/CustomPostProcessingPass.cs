@@ -48,18 +48,7 @@ namespace CPP{
 
             return mActiveCustomPostProcessingIndex.Count != 0;
         }
-
-        // 相机渲染前调用
-        public override void OnCameraSetup(CommandBuffer cmd, ref RenderingData renderingData) {
-            RenderTextureDescriptor blitTargetDescriptor = renderingData.cameraData.cameraTargetDescriptor;
-            blitTargetDescriptor.depthBufferBits = 0;
-
-            var renderer = renderingData.cameraData.renderer;
-
-            // 源RT固定为相机的颜色RT "_CameraColorAttachmentA"
-            mSourceRT = renderer.cameraColorTargetHandle;
-        }
-
+        
         // 实现渲染逻辑
         public override void Execute(ScriptableRenderContext context, ref RenderingData renderingData) {
             // 初始化commandbuffer
@@ -75,8 +64,9 @@ namespace CPP{
             // 初始化临时RT
             bool rt1Used = false;
 
-            // 设置目标RT为本次渲染的RT 在Execute里进行 特殊处理后处理后注入点
+            // 设置源和目标RT为本次渲染的RT 在Execute里进行 特殊处理后处理后注入点
             mDesRT = renderingData.cameraData.renderer.cameraColorTargetHandle;
+            mSourceRT = renderingData.cameraData.renderer.cameraColorTargetHandle;
 
             // 声明temp0临时纹理
             // cmd.GetTemporaryRT(Shader.PropertyToID(mTempRT0.name), descriptor);

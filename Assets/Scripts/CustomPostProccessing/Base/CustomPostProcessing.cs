@@ -15,7 +15,7 @@ namespace CPP{
         public virtual CustomPostProcessInjectionPoint InjectionPoint => CustomPostProcessInjectionPoint.AfterPostProcess;
         
         //  在注入点的顺序
-        public virtual int OrderInInjectonPoint => 0;
+        public virtual int OrderInInjectionPoint => 0;
 
         // 配置当前后处理
         public abstract void Setup();

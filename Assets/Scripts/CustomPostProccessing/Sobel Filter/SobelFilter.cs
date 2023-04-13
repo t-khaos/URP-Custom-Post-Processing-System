@@ -3,11 +3,9 @@ using UnityEngine;
 using UnityEngine.Rendering;
 using UnityEngine.Rendering.Universal;
 
-namespace Pamisu.CustomPP.Effects
-{
+namespace CPP.Effects{
     [VolumeComponentMenu("Custom Post-processing/Sobel Filter")]
-    public class SobelFilter : CustomPostProcessing
-    {
+    public class SobelFilter : CustomPostProcessing{
         public ClampedFloatParameter lineThickness = new(0f, .0005f, .0025f);
         public BoolParameter outLineOnly = new(false);
         public BoolParameter posterize = new(false);
@@ -17,10 +15,9 @@ namespace Pamisu.CustomPP.Effects
 
         private const string ShaderName = "Hidden/PostProcess/SobleFilter";
 
-        public override CustomPostProcessInjectionPoint InjectionPoint => CustomPostProcessInjectionPoint.BeforePostProcess;
+        public override CustomPostProcessInjectionPoint InjectionPoint => CustomPostProcessInjectionPoint.AfterPostProcess;
 
-        public override void Setup()
-        {
+        public override void Setup() {
             if (material == null)
                 material = CoreUtils.CreateEngineMaterial(ShaderName);
         }
@@ -28,7 +25,6 @@ namespace Pamisu.CustomPP.Effects
         public override bool IsActive() => material != null && lineThickness.value > 0f;
 
         public override void Render(CommandBuffer cmd, ref RenderingData renderingData, RTHandle source, RTHandle destination) {
-            Debug.Log("Sobel Filter Render");
             if (material == null)
                 return;
 
@@ -46,8 +42,7 @@ namespace Pamisu.CustomPP.Effects
             cmd.Blit(source, destination, material, 0);
         }
 
-        public override void Dispose(bool disposing)
-        {
+        public override void Dispose(bool disposing) {
             base.Dispose(disposing);
             CoreUtils.Destroy(material);
         }

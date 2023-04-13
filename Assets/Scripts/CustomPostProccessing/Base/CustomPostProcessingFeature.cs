@@ -29,7 +29,7 @@ namespace CPP{
             // 找到在透明物和天空后渲染的CustomPostProcessing
             var afterOpaqueAndSkyCPPs = mCustomPostProcessings
                 .Where(c => c.InjectionPoint == CustomPostProcessInjectionPoint.AfterOpaqueAndSky) // 筛选出所有CustomPostProcessing类中注入点为透明物体和天空后的实例
-                .OrderBy(c => c.OrderInInjectonPoint) // 按照顺序排序
+                .OrderBy(c => c.OrderInInjectionPoint) // 按照顺序排序
                 .ToList(); // 转换为List
             // 创建CustomPostProcessingPass类
             mAfterOpaqueAndSkyPass = new CustomPostProcessingPass("Custom PostProcess after Skybox", afterOpaqueAndSkyCPPs);
@@ -38,14 +38,14 @@ namespace CPP{
 
             var beforePostProcessingCPPs = mCustomPostProcessings
                 .Where(c => c.InjectionPoint == CustomPostProcessInjectionPoint.BeforePostProcess)
-                .OrderBy(c => c.OrderInInjectonPoint)
+                .OrderBy(c => c.OrderInInjectionPoint)
                 .ToList();
             mBeforePostProcessPass = new CustomPostProcessingPass("Custom PostProcess before PostProcess", beforePostProcessingCPPs);
             mBeforePostProcessPass.renderPassEvent = RenderPassEvent.BeforeRenderingPostProcessing;
 
             var afterPostProcessCPPs = mCustomPostProcessings
                 .Where(c => c.InjectionPoint == CustomPostProcessInjectionPoint.AfterPostProcess)
-                .OrderBy(c => c.OrderInInjectonPoint)
+                .OrderBy(c => c.OrderInInjectionPoint)
                 .ToList();
             mAfterPostProcessPass = new CustomPostProcessingPass("Custom PostProcess after PostProcessing", afterPostProcessCPPs);
             mAfterPostProcessPass.renderPassEvent = RenderPassEvent.AfterRenderingPostProcessing;
