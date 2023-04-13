@@ -82,13 +82,13 @@ Shader "Hidden/PostProcess/ColorAdjusments" {
                 color = ColorAdjustmentContrast(color);
                 #endif
                 // 颜色滤镜
-                #ifdef COLORFILTER
+                #ifdef COLOR_FILTER
                 color = ColorAdjustmentColorFilter(color);
                 #endif
                 // 当对比度增加时，会导致颜色分量变暗，在这之后将颜色钳位
                 color = max(color, 0.0);
                 // 色相偏移
-                #ifdef HUESHIFT
+                #ifdef HUE_SHIFT
                 color = ColorAdjustmentHueShift(color);
                 #endif
                 // 饱和度
