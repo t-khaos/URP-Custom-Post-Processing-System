@@ -11,40 +11,32 @@ namespace CPP.Effects{
         public BoolParameter posterize = new(false);
         public IntParameter count = new(6);
 
-        private Material material;
-
         private const string ShaderName = "Hidden/PostProcess/SobleFilter";
 
         public override CustomPostProcessInjectionPoint InjectionPoint => CustomPostProcessInjectionPoint.AfterPostProcess;
 
         public override void Setup() {
-            if (material == null)
-                material = CoreUtils.CreateEngineMaterial(ShaderName);
+            if (mMaterial == null)
+                mMaterial = CoreUtils.CreateEngineMaterial(ShaderName);
         }
 
-        public override bool IsActive() => material != null && lineThickness.value > 0f;
+        public override bool IsActive() => mMaterial != null && lineThickness.value > 0f;
 
-        public override void Render(CommandBuffer cmd, ref RenderingData renderingData, RTHandle source, RTHandle destination) {
-            if (material == null)
+        public override void Render(CommandBuffer cmd, ref RenderingData renderingData, in RTHandle source, in RTHandle destination) {
+            if (mMaterial == null)
                 return;
 
-            material.SetFloat("_Delta", lineThickness.value);
-            material.SetInt("_PosterizationCount", count.value);
-            if (outLineOnly.value)
-                material.EnableKeyword("RAW_OUTLINE");
-            else
-                material.DisableKeyword("RAW_OUTLINE");
-            if (posterize.value)
-                material.EnableKeyword("POSTERIZE");
-            else
-                material.DisableKeyword("POSTERIZE");
+            mMaterial.SetFloat("_Delta", lineThickness.value);
+            mMaterial.SetInt("_PosterizationCount", count.value);
+            SetKeyword("RAW_OUTLINE", outLineOnly.value);
+            SetKeyword("POSTERIZEE", posterize.value);
 
-            cmd.Blit(source, destination, material, 0);
+            Draw(cmd, source, destination, 0);
         }
 
         public override void Dispose(bool disposing) {
             base.Dispose(disposing);
-            CoreUtils.Destroy(material);
+            CoreUtils.Destroy(mMaterial);
         }
     }
 }

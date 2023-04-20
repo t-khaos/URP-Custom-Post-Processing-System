@@ -2,41 +2,50 @@
 #define POSTPROCESSING_INCLUDED
 
 #include "Packages/com.unity.render-pipelines.universal/ShaderLibrary/Core.hlsl"
+#include "Packages/com.unity.render-pipelines.universal/ShaderLibrary/UnityInput.hlsl"
 
-TEXTURE2D(_MainTex);
-SAMPLER(sampler_MainTex);
+TEXTURE2D(_SourceTexture);
+SAMPLER(sampler_SourceTexture);
 
 TEXTURE2D(_CameraDepthTexture);
 SAMPLER(sampler_CameraDepthTexture);
 
-struct Attributes {
-    float4 positionOS : POSITION;
-    float2 uv : TEXCOORD0;
-};
-
 struct Varyings {
+    float4 positionCS : SV_POSITION;
     float2 uv : TEXCOORD0;
-    float4 vertex : SV_POSITION;
     UNITY_VERTEX_OUTPUT_STEREO
 };
 
-half4 SampleSourceTexture(float2 uv) {
-    return SAMPLE_TEXTURE2D(_MainTex, sampler_MainTex, uv);
+half4 GetSource(float2 uv) {
+    return SAMPLE_TEXTURE2D(_SourceTexture, sampler_SourceTexture, uv);
 }
 
-half4 SampleSourceTexture(Varyings input) {
-    return SampleSourceTexture(input.uv);
+half4 GetSource(Varyings input) {
+    return GetSource(input.uv);
 }
 
-Varyings Vert(Attributes input) {
-    Varyings output = (Varyings)0;
-    // 分配instance id
-    UNITY_INITIALIZE_VERTEX_OUTPUT_STEREO(output);
+float SampleDepth(float2 uv) {
+    #if defined(UNITY_STEREO_INSTANCING_ENABLED) || defined(UNITY_STEREO_MULTIVIEW_ENABLED)
+    return SAMPLE_TEXTURE2D_ARRAY(_CameraDepthTexture, sampler_CameraDepthTexture, uv, unity_StereoEyeIndex).r;
+    #else
+    return SAMPLE_DEPTH_TEXTURE(_CameraDepthTexture, sampler_CameraDepthTexture, uv);
+    #endif
+}
 
-    VertexPositionInputs vertexInput = GetVertexPositionInputs(input.positionOS.xyz);
-    output.vertex = vertexInput.positionCS;
-    output.uv = input.uv;
+float SampleDepth(Varyings input) {
+    return SampleDepth(input.uv);
+}
 
+Varyings Vert(uint vertexID : SV_VertexID) {
+    Varyings output;
+    // 根据id判断三角形顶点的坐标
+    // 坐标顺序为(-1, -1) (-1, 3) (3, -1)
+    output.positionCS = float4(vertexID <= 1 ? -1.0 : 3.0, vertexID == 1 ? 3.0 : -1.0, 0.0, 1.0);
+    output.uv = float2(vertexID <= 1 ? 0.0 : 2.0, vertexID == 1 ? 2.0 : 0.0);
+    // 不同API可能会产生颠倒的情况 进行判断
+    if (_ProjectionParams.x < 0.0) {
+        output.uv.y = 1.0 - output.uv.y;
+    }
     return output;
 }
 

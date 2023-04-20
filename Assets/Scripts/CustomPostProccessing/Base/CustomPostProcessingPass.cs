@@ -68,9 +68,7 @@ namespace CPP{
             mDesRT = renderingData.cameraData.renderer.cameraColorTargetHandle;
             mSourceRT = renderingData.cameraData.renderer.cameraColorTargetHandle;
 
-            // 声明temp0临时纹理
-            // cmd.GetTemporaryRT(Shader.PropertyToID(mTempRT0.name), descriptor);
-            // mTempRT0 = RTHandles.Alloc(mTempRT0.name);
+            // 声明temp0临时纹理z
             RenderingUtils.ReAllocateIfNeeded(ref mTempRT0, descriptor, name: mTempRT0Name);
 
             // 执行每个组件的Render方法

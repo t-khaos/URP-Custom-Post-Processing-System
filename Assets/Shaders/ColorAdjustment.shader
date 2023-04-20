@@ -8,14 +8,20 @@ Shader "Hidden/PostProcess/ColorAdjusments" {
             "RenderType" = "Opaque"
             "RenderPipeline" = "UniversalPipeline"
         }
+        
         LOD 200
+        ZWrite Off
+        Cull Off
+        
+        HLSLINCLUDE
+        #include "Common/PostProcessing.hlsl"
+        #include "Packages/com.unity.render-pipelines.core/ShaderLibrary/Color.hlsl"
+        ENDHLSL
+        
         Pass {
             name "ColorAdjustmentPass"
 
             HLSLPROGRAM
-            #include "Common/PostProcessing.hlsl"
-            #include "Packages/com.unity.render-pipelines.core/ShaderLibrary/Color.hlsl"
-
             #pragma vertex Vert
             #pragma fragment frag
 
@@ -101,7 +107,7 @@ Shader "Hidden/PostProcess/ColorAdjusments" {
             }
 
             half4 frag(Varyings input) : SV_Target {
-                half3 color = SampleSourceTexture(input).xyz;
+                half3 color = GetSource(input).xyz;
                 half3 finalCol = ColorAdjustment(color);
                 return half4(finalCol, 1.0);
             }

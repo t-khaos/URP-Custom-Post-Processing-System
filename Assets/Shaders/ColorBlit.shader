@@ -1,15 +1,12 @@
 Shader "Hidden/PostProcess/ColorBlit" {
-    Properties {
-        // 显式声明出来_MainTex
-        [HideInInspector]_MainTex ("Base (RGB)", 2D) = "white" {}
-    }
     SubShader {
-
         Tags {
             "RenderType"="Opaque"
             "RenderPipeline" = "UniversalPipeline"
         }
         LOD 200
+        ZWrite Off
+        Cull Off
         Pass {
             Name "ColorBlitPass"
 
@@ -22,7 +19,7 @@ Shader "Hidden/PostProcess/ColorBlit" {
             float _Intensity;
 
             half4 frag(Varyings input) : SV_Target {
-                float4 color = SAMPLE_TEXTURE2D(_MainTex, sampler_MainTex, input.uv);
+                float4 color = GetSource(input);
                 return color * float4(0, _Intensity, 0, 1);
             }
             ENDHLSL

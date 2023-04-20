@@ -25,7 +25,6 @@ namespace CPP.EFFECTS{
 
         #endregion
 
-        private Material mMaterial;
         private const string mShaderName = "Hidden/PostProcess/ColorAdjusments";
 
         #region Active State Check
@@ -58,7 +57,7 @@ namespace CPP.EFFECTS{
                 mMaterial = CoreUtils.CreateEngineMaterial(mShaderName);
         }
 
-        public override void Render(CommandBuffer cmd, ref RenderingData renderingData, RTHandle source, RTHandle destination) {
+        public override void Render(CommandBuffer cmd, ref RenderingData renderingData, in RTHandle source, in RTHandle destination) {
             if (mMaterial == null) return;
             Vector4 colorAdjustmentsVector4 = new Vector4(
                 Mathf.Pow(2f, postExposure.value), // 曝光度 曝光单位是2的幂次
@@ -69,19 +68,15 @@ namespace CPP.EFFECTS{
             mMaterial.SetColor(mColorFilterId, colorFilter.value);
 
             // 根据是否激活对应调整设置keyword
-            SetKeyWord(mExposureKeyword, IsPostExposureActive());
-            SetKeyWord(mContrastKeyword, IsContrastActive());
-            SetKeyWord(mHueShiftKeyword, IsHueShiftActive());
-            SetKeyWord(mSaturationKeyword, IsSaturationActive());
-            SetKeyWord(mColorFilterKeyword, IsColorFilterActive());
+            SetKeyword(mExposureKeyword, IsPostExposureActive());
+            SetKeyword(mContrastKeyword, IsContrastActive());
+            SetKeyword(mHueShiftKeyword, IsHueShiftActive());
+            SetKeyword(mSaturationKeyword, IsSaturationActive());
+            SetKeyword(mColorFilterKeyword, IsColorFilterActive());
 
-            cmd.Blit(source, destination, mMaterial, 0);
+            Draw(cmd, source, destination, 0);
         }
 
-        private void SetKeyWord(string keyword, bool enabled = true) {
-            if (enabled) mMaterial.EnableKeyword(keyword);
-            else mMaterial.DisableKeyword(keyword);
-        }
 
         public override void Dispose(bool disposing) {
             base.Dispose(disposing);
