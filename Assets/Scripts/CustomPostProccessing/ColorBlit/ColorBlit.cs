@@ -4,7 +4,7 @@ using UnityEngine.Rendering;
 using UnityEngine.Rendering.Universal;
 
 namespace CPP.EFFECTS{
-    [VolumeComponentMenu("Custom Post-processing/Color Blit")]
+    [VolumeComponentMenu("Custom Post Processing/Color Adjustment/Color Blit")]
     public class ColorBlit : CustomPostProcessing{
         public ClampedFloatParameter intensity = new(0.0f, 0.0f, 2.0f);
 

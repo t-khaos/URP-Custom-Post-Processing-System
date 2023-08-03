@@ -4,7 +4,7 @@ using UnityEngine.Rendering.Universal;
 using CPP;
 
 namespace CPP.EFFECTS{
-    [VolumeComponentMenu("Custom Post-processing/Color Adjusment")]
+    [VolumeComponentMenu("Custom Post Processing/Color Adjustment/Color Adjusment")]
     public class ColorAdjustments : CustomPostProcessing{
         #region Parameters Define
 

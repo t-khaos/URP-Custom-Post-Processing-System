@@ -5,7 +5,7 @@ using UnityEngine.Rendering;
 using UnityEngine.Rendering.Universal;
 
 namespace CPP.EFFECTS{
-    [VolumeComponentMenu("Custom Post Processing/Blur/Glitch RGB Split")]
+    [VolumeComponentMenu("Custom Post Processing/Glitch/Glitch RGB Split")]
     public class GlitchRGBSplit : CustomPostProcessing{
         #region Properties Defination
 
