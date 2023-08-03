@@ -33,6 +33,9 @@ namespace CPP{
         // 配置当前后处理
         public abstract void Setup();
 
+        public virtual void OnCameraSetup(CommandBuffer cmd, ref RenderingData renderingData) {
+        }
+
         // 执行渲染
         public abstract void Render(CommandBuffer cmd, ref RenderingData renderingData, in RTHandle source, in RTHandle destination);
 
@@ -52,8 +55,16 @@ namespace CPP{
                 cmd.DrawProcedural(Matrix4x4.identity, mMaterial, pass, MeshTopology.Triangles, 3);
         }
 
+        protected RenderTextureDescriptor GetCameraRenderTextureDescriptor(RenderingData renderingData) {
+            var descriptor = renderingData.cameraData.cameraTargetDescriptor;
+            descriptor.msaaSamples = 1;
+            descriptor.depthBufferBits = 0;
+            descriptor.useMipMap = false;
+            return descriptor;
+        }
+
         #endregion
-        
+
         // 设置keyword
         protected void SetKeyword(string keyword, bool enabled = true) {
             if (enabled) mMaterial.EnableKeyword(keyword);

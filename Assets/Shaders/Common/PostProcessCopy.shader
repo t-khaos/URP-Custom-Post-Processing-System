@@ -13,7 +13,7 @@
         ENDHLSL
 
         Pass {
-            Name "CopyPass"
+            Name "Copy Pass"
 
             HLSLPROGRAM
             #pragma vertex Vert

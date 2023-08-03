@@ -22,8 +22,28 @@ namespace CPP{
         private RTHandle mTempRT0;
         private RTHandle mTempRT1;
 
-        private string mTempRT0Name => "_TemporaryRenderTexture0";
-        private string mTempRT1Name => "_TemporaryRenderTexture1";
+        private string mTempRT0Name => "_IntermediateRenderTarget0";
+        private string mTempRT1Name => "_IntermediateRenderTarget1";
+
+
+        public override void OnCameraSetup(CommandBuffer cmd, ref RenderingData renderingData) {
+            var descriptor = renderingData.cameraData.cameraTargetDescriptor;
+            descriptor.msaaSamples = 1;
+            descriptor.depthBufferBits = 0;
+
+            // 分配临时纹理
+            RenderingUtils.ReAllocateIfNeeded(ref mTempRT0, descriptor, name: mTempRT0Name);
+            RenderingUtils.ReAllocateIfNeeded(ref mTempRT1, descriptor, name: mTempRT1Name);
+
+            foreach (var i in mActiveCustomPostProcessingIndex) {
+                mCustomPostProcessings[i].OnCameraSetup(cmd, ref renderingData);
+            }
+        }
+
+        public override void OnCameraCleanup(CommandBuffer cmd) {
+            mDesRT = null;
+            mSourceRT = null;
+        }
 
         public CustomPostProcessingPass(string profilerTag, List<CustomPostProcessing> customPostProcessings) {
             mProfilerTag = profilerTag;
@@ -31,9 +51,6 @@ namespace CPP{
             mActiveCustomPostProcessingIndex = new List<int>(customPostProcessings.Count);
             // 将自定义后处理器对象列表转换成一个性能采样器对象列表
             mProfilingSamplers = customPostProcessings.Select(c => new ProfilingSampler(c.ToString())).ToList();
-
-            mTempRT0 = RTHandles.Alloc(mTempRT0Name, name: mTempRT0Name);
-            mTempRT1 = RTHandles.Alloc(mTempRT1Name, name: mTempRT1Name);
         }
 
         // 获取active的CPPs下标，并返回是否存在有效组件
@@ -48,7 +65,7 @@ namespace CPP{
 
             return mActiveCustomPostProcessingIndex.Count != 0;
         }
-        
+
         // 实现渲染逻辑
         public override void Execute(ScriptableRenderContext context, ref RenderingData renderingData) {
             // 初始化commandbuffer
@@ -56,20 +73,9 @@ namespace CPP{
             context.ExecuteCommandBuffer(cmd);
             cmd.Clear();
 
-            // 获取相机Descriptor
-            var descriptor = renderingData.cameraData.cameraTargetDescriptor;
-            descriptor.msaaSamples = 1;
-            descriptor.depthBufferBits = 0;
-
-            // 初始化临时RT
-            bool rt1Used = false;
-
             // 设置源和目标RT为本次渲染的RT 在Execute里进行 特殊处理后处理后注入点
             mDesRT = renderingData.cameraData.renderer.cameraColorTargetHandle;
             mSourceRT = renderingData.cameraData.renderer.cameraColorTargetHandle;
-
-            // 声明temp0临时纹理z
-            RenderingUtils.ReAllocateIfNeeded(ref mTempRT0, descriptor, name: mTempRT0Name);
 
             // 执行每个组件的Render方法
             if (mActiveCustomPostProcessingIndex.Count == 1) {
@@ -79,10 +85,7 @@ namespace CPP{
                 }
             }
             else {
-                // 如果有多个组件，则在两个RT上来回bilt
-                RenderingUtils.ReAllocateIfNeeded(ref mTempRT1, descriptor, name: mTempRT1Name);
-                rt1Used = true;
-                Blit(cmd, mSourceRT, mTempRT0);
+                Blitter.BlitCameraTexture(cmd, mSourceRT, mTempRT0);
                 for (int i = 0; i < mActiveCustomPostProcessingIndex.Count; i++) {
                     int index = mActiveCustomPostProcessingIndex[i];
                     var customProcessing = mCustomPostProcessings[index];
@@ -93,15 +96,16 @@ namespace CPP{
                     CoreUtils.Swap(ref mTempRT0, ref mTempRT1);
                 }
             }
-            
-            Blitter.BlitCameraTexture(cmd, mTempRT0, mDesRT);
 
-            // 释放
-            cmd.ReleaseTemporaryRT(Shader.PropertyToID(mTempRT0.name));
-            if (rt1Used) cmd.ReleaseTemporaryRT(Shader.PropertyToID(mTempRT1.name));
+            Blitter.BlitCameraTexture(cmd, mTempRT0, mDesRT);
 
             context.ExecuteCommandBuffer(cmd);
             CommandBufferPool.Release(cmd);
+        }
+
+        public void Dispose() {
+            mTempRT0?.Release();
+            mTempRT1?.Release();
         }
     }
 }

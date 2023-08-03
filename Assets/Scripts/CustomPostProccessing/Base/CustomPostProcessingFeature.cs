@@ -50,7 +50,7 @@ namespace CPP{
             mAfterPostProcessPass = new CustomPostProcessingPass("Custom PostProcess after PostProcessing", afterPostProcessCPPs);
             mAfterPostProcessPass.renderPassEvent = RenderPassEvent.AfterRenderingPostProcessing;
         }
-        
+
         // 当为每个摄像机设置一个渲染器时，调用此方法
         // 将不同注入点的RenderPass注入到renderer中
         public override void AddRenderPasses(ScriptableRenderer renderer, ref RenderingData renderingData) {
@@ -77,7 +77,12 @@ namespace CPP{
 
         protected override void Dispose(bool disposing) {
             base.Dispose(disposing);
-            if (disposing && mCustomPostProcessings != null) {
+
+            mAfterOpaqueAndSkyPass.Dispose();
+            mBeforePostProcessPass.Dispose();
+            mAfterPostProcessPass.Dispose();
+
+            if (mCustomPostProcessings != null) {
                 foreach (var item in mCustomPostProcessings) {
                     item.Dispose();
                 }
