@@ -4,6 +4,7 @@ using UnityEngine.Rendering;
 using UnityEngine.Rendering.Universal;
 
 namespace CPP{
+    // 声明注入点的插入Event
     public enum CustomPostProcessInjectionPoint{
         AfterOpaqueAndSky,
         BeforePostProcess,
@@ -31,7 +32,10 @@ namespace CPP{
         }
 
         // 配置当前后处理
+        public abstract bool IsActive();
+
         public abstract void Setup();
+
 
         public virtual void OnCameraSetup(CommandBuffer cmd, ref RenderingData renderingData) {
         }
@@ -63,21 +67,15 @@ namespace CPP{
             return descriptor;
         }
 
-        #endregion
-
         // 设置keyword
         protected void SetKeyword(string keyword, bool enabled = true) {
             if (enabled) mMaterial.EnableKeyword(keyword);
             else mMaterial.DisableKeyword(keyword);
         }
 
-        #region IPostProcessComponent
-
-        public abstract bool IsActive();
+        #endregion
 
         public virtual bool IsTileCompatible() => false;
-
-        #endregion
 
         #region IDisposable
 

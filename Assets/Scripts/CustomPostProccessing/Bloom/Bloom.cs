@@ -63,7 +63,7 @@ namespace CPP.EFFECTS{
         private RTHandle[] mTempRT = new RTHandle[MAXITERATION * 2 + 1];
         private RTHandle mPrefilteredRT;
 
-        // 初始化脚本
+        // 初始化实例
         public override void Setup() {
             if (mMaterial == null) {
                 mMaterial = CoreUtils.CreateEngineMaterial(mShaderName);

@@ -1,5 +1,5 @@
 // 参考：https://catlikecoding.com/unity/tutorials/custom-srp/post-processing/
-
+    
 Shader "Hidden/PostProcessing/Bloom" {
     SubShader {
         Tags {
