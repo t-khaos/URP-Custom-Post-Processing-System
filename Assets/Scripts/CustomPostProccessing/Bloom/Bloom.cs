@@ -20,6 +20,7 @@ namespace CPP.EFFECTS{
             Scatter
         }
 
+        // 参数声明
         #region Parameters Defination
 
         private const int MAXITERATION = 16;
@@ -36,14 +37,19 @@ namespace CPP.EFFECTS{
 
         #endregion
 
+        // 判断是否激活
         public override bool IsActive() => mMaterial != null && Iteration.value != 0;
 
-        public override CustomPostProcessInjectionPoint InjectionPoint => CustomPostProcessInjectionPoint.AfterPostProcess;
+        // 注入点
+        public override CustomPostProcessInjectionPoint InjectionPoint => CustomPostProcessInjectionPoint.BeforePostProcess;
 
+        // 在注入点中的序号
         public override int OrderInInjectionPoint => 1;
 
+        // 加载的Shader名称
         private const string mShaderName = "Hidden/PostProcessing/Bloom";
 
+        // 其他变量
         private const string mBloomAddtiveKeyword = "_BLOOMADDTIVE",
             mBloomScatterKeyword = "_BLOOMSCATTER";
 
@@ -58,12 +64,14 @@ namespace CPP.EFFECTS{
         private RTHandle[] mTempRT = new RTHandle[MAXITERATION * 2 + 1];
         private RTHandle mPrefilteredRT;
 
+        // 初始化脚本
         public override void Setup() {
             if (mMaterial == null) {
                 mMaterial = CoreUtils.CreateEngineMaterial(mShaderName);
             }
         }
 
+        // 当相机初始化时执行
         public override void OnCameraSetup(CommandBuffer cmd, ref RenderingData renderingData) {
             var descriptor = GetCameraRenderTextureDescriptor(renderingData);
             descriptor.width = (int)(descriptor.width / RTDownScaling.value);
@@ -80,6 +88,7 @@ namespace CPP.EFFECTS{
             }
         }
 
+        // 具体渲染逻辑
         public override void Render(CommandBuffer cmd, ref RenderingData renderingData, in RTHandle source, in RTHandle destination) {
             if (mMaterial == null) return;
 
@@ -138,6 +147,7 @@ namespace CPP.EFFECTS{
             Draw(cmd, mTempRT[0], destination, (int)finalPass);
         }
 
+        // 释放
         public override void Dispose(bool disposing) {
             base.Dispose(disposing);
             CoreUtils.Destroy(mMaterial);
