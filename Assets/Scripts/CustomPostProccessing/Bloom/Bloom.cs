@@ -46,10 +46,9 @@ namespace CPP.EFFECTS{
         // 在注入点中的序号
         public override int OrderInInjectionPoint => 1;
 
-        // 加载的Shader名称
-        private const string mShaderName = "Hidden/PostProcessing/Bloom";
-
         // 其他变量
+        private const string mShaderName = "Hidden/PostProcessing/Bloom";
+        
         private const string mBloomAddtiveKeyword = "_BLOOMADDTIVE",
             mBloomScatterKeyword = "_BLOOMSCATTER";
 
