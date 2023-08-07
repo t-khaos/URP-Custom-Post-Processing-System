@@ -26,6 +26,7 @@ namespace CPP{
         private string mTempRT1Name => "_IntermediateRenderTarget1";
 
 
+        // 相机初始化时执行
         public override void OnCameraSetup(CommandBuffer cmd, ref RenderingData renderingData) {
             var descriptor = renderingData.cameraData.cameraTargetDescriptor;
             descriptor.msaaSamples = 1;
@@ -40,6 +41,7 @@ namespace CPP{
             }
         }
 
+        // 相机清除时执行
         public override void OnCameraCleanup(CommandBuffer cmd) {
             mDesRT = null;
             mSourceRT = null;
@@ -68,7 +70,7 @@ namespace CPP{
 
         // 实现渲染逻辑
         public override void Execute(ScriptableRenderContext context, ref RenderingData renderingData) {
-            // 初始化commandbuffer
+            // 初始化CommandBuffer
             var cmd = CommandBufferPool.Get(mProfilerTag);
             context.ExecuteCommandBuffer(cmd);
             cmd.Clear();

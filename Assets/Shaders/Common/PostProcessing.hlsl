@@ -8,9 +8,6 @@ TEXTURE2D(_SourceTexture);
 SAMPLER(sampler_SourceTexture);
 float4 _SourceTexture_TexelSize;
 
-TEXTURE2D(_CameraDepthTexture);
-SAMPLER(sampler_CameraDepthTexture);
-
 struct Varyings {
     float4 positionCS : SV_POSITION;
     float2 uv : TEXCOORD0;
@@ -25,20 +22,13 @@ half4 GetSource(Varyings input) {
     return GetSource(input.uv);
 }
 
-float SampleDepth(float2 uv) {
-    #if defined(UNITY_STEREO_INSTANCING_ENABLED) || defined(UNITY_STEREO_MULTIVIEW_ENABLED)
-    return SAMPLE_TEXTURE2D_ARRAY(_CameraDepthTexture, sampler_CameraDepthTexture, uv, unity_StereoEyeIndex).r;
-    #else
-    return SAMPLE_DEPTH_TEXTURE(_CameraDepthTexture, sampler_CameraDepthTexture, uv);
-    #endif
-}
-
-float SampleDepth(Varyings input) {
-    return SampleDepth(input.uv);
+float4 GetSourceTexelSize() {
+    return _SourceTexture_TexelSize;
 }
 
 struct ScreenSpaceData {
     float4 positionCS;
+    float4 positionNDC;
     float2 uv;
 };
 
@@ -52,6 +42,7 @@ ScreenSpaceData GetScreenSpaceData(uint vertexID : SV_VertexID) {
     if (_ProjectionParams.x < 0.0) {
         output.uv.y = 1.0 - output.uv.y;
     }
+    output.positionNDC = float4(output.uv * 2.0 - 1.0, UNITY_NEAR_CLIP_VALUE, 1.0);
     return output;
 }
 

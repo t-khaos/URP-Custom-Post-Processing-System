@@ -13,7 +13,7 @@ namespace CPP.EFFECTS{
 
         private const string mShaderName = "Hidden/PostProcessing/GaussianBlur";
 
-        private int mBlurSizeKeyword = Shader.PropertyToID("_BlurSize");
+        private int mBlurSizeKeyword = Shader.PropertyToID("_GaussianBlurSize");
 
         public override bool IsActive() => mMaterial != null && Iteration.value != 0;
 

@@ -32,13 +32,11 @@ namespace CPP.EFFECTS{
 
         private string mTempRT0Name => "_TemporaryRenderTexture";
 
-        private RTHandle[] mTempRT;
+        private RTHandle[] mTempRT = new RTHandle[MAXITERATION + 1];
 
         public override void Setup() {
             if (mMaterial == null) {
                 mMaterial = CoreUtils.CreateEngineMaterial(mShaderName);
-
-                mTempRT = new RTHandle[MAXITERATION + 1];
             }
         }
 
@@ -62,7 +60,7 @@ namespace CPP.EFFECTS{
             cmd.SetGlobalFloat(mAreaSizeKeyword, AreaSize.value);
             cmd.SetGlobalFloat(mAreaSpreadKeyword, AreaSpread.value);
             cmd.SetGlobalFloat(mIterationKeyword, Iteration.value);
-            
+
             for (int i = 0; i < Iteration.value; i++) {
                 cmd.SetGlobalFloat(mBlurSizeKeyword, 1.0f + i * BlurSpread.value);
                 Draw(cmd, mTempRT[i], mTempRT[i + 1], 0);

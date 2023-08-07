@@ -60,12 +60,6 @@ namespace CPP.EFFECTS{
             }
 
             Draw(cmd, mTempRT0, destination);
-
-            mTempRT0 = null;
-            mTempRT1 = null;
-
-            cmd.ReleaseTemporaryRT(Shader.PropertyToID(mTempRT0.name));
-            cmd.ReleaseTemporaryRT(Shader.PropertyToID(mTempRT1.name));
         }
 
         public override void Dispose(bool disposing) {

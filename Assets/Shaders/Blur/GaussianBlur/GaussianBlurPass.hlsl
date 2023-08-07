@@ -9,15 +9,15 @@ struct GaussianVaryings {
     UNITY_VERTEX_OUTPUT_STEREO
 };
 
-float4 _BloomBlurSize;
+float4 _GaussianBlurSize;
 
 GaussianVaryings GaussianBlurPassVertex(uint vertexID : SV_VertexID) {
     GaussianVaryings output;
     ScreenSpaceData ssData = GetScreenSpaceData(vertexID);
     output.positionCS = ssData.positionCS;
     output.uv = ssData.uv;
-    output.uv01 = output.uv.xyxy + _BloomBlurSize.xyxy * float4(1.0f, 1.0f, -1.0f, -1.0f) * _SourceTexture_TexelSize.xyxy;
-    output.uv23 = output.uv.xyxy + _BloomBlurSize.xyxy * float4(1.0f, 1.0f, -1.0f, -1.0f) * 2.0f * _SourceTexture_TexelSize.xyxy;
+    output.uv01 = output.uv.xyxy + _GaussianBlurSize.xyxy * float4(1.0f, 1.0f, -1.0f, -1.0f) * _SourceTexture_TexelSize.xyxy;
+    output.uv23 = output.uv.xyxy + _GaussianBlurSize.xyxy * float4(1.0f, 1.0f, -1.0f, -1.0f) * 2.0f * _SourceTexture_TexelSize.xyxy;
 
     return output;
 }

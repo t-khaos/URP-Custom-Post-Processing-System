@@ -36,7 +36,7 @@ namespace CPP.EFFECTS{
 
         public override bool IsActive() => mMaterial != null && Amount.value != 0.0f;
 
-        public override CustomPostProcessInjectionPoint InjectionPoint => CustomPostProcessInjectionPoint.BeforePostProcess;
+        public override CustomPostProcessInjectionPoint InjectionPoint => CustomPostProcessInjectionPoint.AfterPostProcess;
 
         public override int OrderInInjectionPoint => 3;
 

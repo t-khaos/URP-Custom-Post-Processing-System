@@ -32,13 +32,11 @@ namespace CPP.EFFECTS{
 
         private string mTempRTName => "_TemporaryRenderTexture";
 
-        private RTHandle[] mTempRT;
+        private RTHandle[] mTempRT = new RTHandle[MAXITERATION + 1];
 
         public override void Setup() {
             if (mMaterial == null) {
                 mMaterial = CoreUtils.CreateEngineMaterial(mShaderName);
-
-                mTempRT = new RTHandle[MAXITERATION + 1];
             }
         }
 

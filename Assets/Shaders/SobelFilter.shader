@@ -11,6 +11,8 @@ Shader "Hidden/PostProcess/SobleFilter" {
         HLSLINCLUDE
         #include "Common/PostProcessing.hlsl"
         #include "Packages/com.unity.render-pipelines.core/ShaderLibrary/Color.hlsl"
+        #include "Packages/com.unity.render-pipelines.universal/ShaderLibrary/DeclareDepthTexture.hlsl"
+        #include "Packages/com.unity.render-pipelines.universal/ShaderLibrary/DeclareNormalsTexture.hlsl"
         ENDHLSL
 
         Pass {
@@ -28,19 +30,19 @@ Shader "Hidden/PostProcess/SobleFilter" {
                 float hr = 0;
                 float vt = 0;
 
-                hr += SampleDepth(uv + float2(-1.0, -1.0) * delta) * 1.0;
-                hr += SampleDepth(uv + float2(1.0, -1.0) * delta) * -1.0;
-                hr += SampleDepth(uv + float2(-1.0, 0.0) * delta) * 2.0;
-                hr += SampleDepth(uv + float2(1.0, 0.0) * delta) * -2.0;
-                hr += SampleDepth(uv + float2(-1.0, 1.0) * delta) * 1.0;
-                hr += SampleDepth(uv + float2(1.0, 1.0) * delta) * -1.0;
+                hr += SampleSceneDepth(uv + float2(-1.0, -1.0) * delta) * 1.0;
+                hr += SampleSceneDepth(uv + float2(1.0, -1.0) * delta) * -1.0;
+                hr += SampleSceneDepth(uv + float2(-1.0, 0.0) * delta) * 2.0;
+                hr += SampleSceneDepth(uv + float2(1.0, 0.0) * delta) * -2.0;
+                hr += SampleSceneDepth(uv + float2(-1.0, 1.0) * delta) * 1.0;
+                hr += SampleSceneDepth(uv + float2(1.0, 1.0) * delta) * -1.0;
 
-                vt += SampleDepth(uv + float2(-1.0, -1.0) * delta) * 1.0;
-                vt += SampleDepth(uv + float2(0.0, -1.0) * delta) * 2.0;
-                vt += SampleDepth(uv + float2(1.0, -1.0) * delta) * 1.0;
-                vt += SampleDepth(uv + float2(-1.0, 1.0) * delta) * -1.0;
-                vt += SampleDepth(uv + float2(0.0, 1.0) * delta) * -2.0;
-                vt += SampleDepth(uv + float2(1.0, 1.0) * delta) * -1.0;
+                vt += SampleSceneDepth(uv + float2(-1.0, -1.0) * delta) * 1.0;
+                vt += SampleSceneDepth(uv + float2(0.0, -1.0) * delta) * 2.0;
+                vt += SampleSceneDepth(uv + float2(1.0, -1.0) * delta) * 1.0;
+                vt += SampleSceneDepth(uv + float2(-1.0, 1.0) * delta) * -1.0;
+                vt += SampleSceneDepth(uv + float2(0.0, 1.0) * delta) * -2.0;
+                vt += SampleSceneDepth(uv + float2(1.0, 1.0) * delta) * -1.0;
 
                 return sqrt(hr * hr + vt * vt);
             }
