@@ -3,7 +3,7 @@ using UnityEngine;
 using UnityEngine.Rendering;
 using UnityEngine.Rendering.Universal;
 
-namespace CPP.Effects{
+namespace CPP.EFFECTS{
     [VolumeComponentMenu("Custom Post Processing/Stylized/Sobel Filter")]
     public class SobelFilter : CustomPostProcessing{
         public ClampedFloatParameter lineThickness = new(0f, .0005f, .0025f);
