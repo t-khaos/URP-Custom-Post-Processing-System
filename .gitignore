@@ -1,0 +1,7 @@
+*
+!Assets
+!Assets/
+!Assets/Scripts/
+!Assets/Scripts/**
+!Assets/Shaders/
+!Assets/Shaders/**
