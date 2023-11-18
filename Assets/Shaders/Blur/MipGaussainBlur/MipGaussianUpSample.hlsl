@@ -34,7 +34,7 @@ half4 MipGaussianUpSampleFragment(Varyings input) : SV_Target
 
     const float weight = MipGaussianBlendWeight();
 
-    const float3 Color = _UpSampleTexture.SampleLevel(sampler_UpSampleTexture, input.uv, g_level + 1);
+    const float3 Color = _UpSampleTexture.Sample(sampler_UpSampleTexture, input.uv);
     const float3 src = _DownSampleTexture.SampleLevel(sampler_DownSampleTexture, input.uv, g_level);
     return float4((1 - weight) * Color + weight * src, 1.0);
 }

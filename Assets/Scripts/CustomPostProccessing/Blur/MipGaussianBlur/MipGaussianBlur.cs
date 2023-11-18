@@ -54,7 +54,7 @@ namespace CPP.EFFECTS
         public override void OnCameraSetup(CommandBuffer cmd, ref RenderingData renderingData)
         {
             var descriptor = GetCameraRenderTextureDescriptor(renderingData);
-            
+
             var size = 1;
             for (var i = mipCount - 1; i >= 0; i--)
             {
@@ -88,7 +88,7 @@ namespace CPP.EFFECTS
             {
                 for (var i = mipCount - 1; i >= 0; i--)
                 {
-                    cmd.SetGlobalFloat(mSigmaKeyword, 10);
+                    cmd.SetGlobalFloat(mSigmaKeyword, Sigma.value);
                     cmd.SetGlobalInt(mMipLevelKeyword, i);
 
                     cmd.SetGlobalTexture(mDownSampleTextureId, mDownSampleRT);
@@ -111,7 +111,7 @@ namespace CPP.EFFECTS
         {
             base.Dispose(disposing);
             CoreUtils.Destroy(mMaterial);
-            
+
             mDownSampleRT?.Release();
             foreach (var rt in mUpSampleRTs)
             {
